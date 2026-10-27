@@ -1,0 +1,17 @@
+{
+  "name": "sharemeal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A food donation and NGO distribution platform.",
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "test": "npm test --prefix backend",
+    "lint": "npm run lint --prefix frontend",
+    "dev": "concurrently npm:dev:backend npm:dev:frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

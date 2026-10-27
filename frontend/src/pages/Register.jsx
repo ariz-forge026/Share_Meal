@@ -1,0 +1,20 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, HeartHandshake } from 'lucide-react';
+import StatusMessage from '../components/StatusMessage.jsx';
+import { useAuth } from '../hooks/useAuth.js';
+import { getErrorMessage } from '../services/api.js';
+
+export default function Register() {
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+  const [role, setRole] = useState('donor');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function submit(event) {
+    event.preventDefault(); setError(''); setBusy(true);
+    const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+    try { await signUp({ ...values, role }); navigate(role === 'ngo' ? '/ngos/apply' : '/dashboard'); } catch (requestError) { setError(getErrorMessage(requestError)); } finally { setBusy(false); }
+  }
+  return <section className="auth-section"><div className="auth-card auth-card-wide"><span className="auth-icon"><HeartHandshake size={25} /></span><span className="eyebrow">Join the neighborhood</span><h1>Make room for good.</h1><p>Create an account to share food or connect your organization.</p><div className="role-picker" role="group" aria-label="Account type"><button type="button" className={role === 'donor' ? 'role-option role-active' : 'role-option'} onClick={() => setRole('donor')}><strong>Food donor</strong><span>Business or individual</span></button><button type="button" className={role === 'ngo' ? 'role-option role-active' : 'role-option'} onClick={() => setRole('ngo')}><strong>Organization</strong><span>Nonprofit or NGO</span></button></div>{role === 'ngo' && <StatusMessage>NGO registration does not grant verified status. Complete the application and wait for an administrator review before requesting donations.</StatusMessage>}<form className="auth-form" onSubmit={submit}><label className="field">Your name<input name="name" required minLength="2" maxLength="80" autoComplete="name" placeholder="Your full name" /></label><label className="field">Email address<input name="email" type="email" required autoComplete="email" placeholder="you@example.com" /></label>{role === 'donor' && <><label className="field">Donor type<select name="donorType" defaultValue="individual"><option value="individual">Individual</option><option value="restaurant">Restaurant</option><option value="hotel">Hotel</option><option value="cafe">Cafe</option><option value="caterer">Catering business</option><option value="grocery">Grocery store</option><option value="food_shop">Food shop</option><option value="event_organizer">Event organizer</option><option value="other">Other</option></select></label><label className="field">Business name, if applicable<input name="businessName" maxLength="120" placeholder="Optional" /></label></>}{role === 'ngo' && <><label className="field">Organization name<input name="organizationName" required minLength="2" maxLength="120" placeholder="Your organization" /></label><label className="field">Organization address<input name="address" required minLength="5" maxLength="250" placeholder="Street, city, region" /></label><label className="field">City<input name="city" required minLength="2" maxLength="80" placeholder="Your city" /></label><label className="field">About your work<textarea name="description" maxLength="500" rows="3" placeholder="Who does your organization support?" /></label></>}<label className="field">Password<input name="password" type="password" required minLength="8" autoComplete="new-password" placeholder="At least 8 characters" /><span className="field-hint">Use at least 8 characters.</span></label>{error && <StatusMessage variant="error">{error}</StatusMessage>}<button className="button button-primary button-wide" disabled={busy}>{busy ? 'Creating account…' : 'Create account'} <ArrowRight size={16} /></button></form><p className="auth-switch">Already part of ShareMeal? <Link to="/login">Sign in</Link></p></div></section>;
+}
